@@ -2,25 +2,18 @@
 const express = require('express');
 const router = express.Router();
 const CreateAuthor = require("../controller/authorController")
-const CreateBlog = require("../controller/blogController")
+const { CreateBlog, GetDataBlog } = require("../controller/blogController")
 
 
 
 
-// =====================================================================================================
+//=====================Create Authors(Post API)=====================//
 router.post("/authors", CreateAuthor)
-// =====================================================================================================
+//=====================Create Blogs(Post API)=====================//
 router.post("/blogs", CreateBlog)
-// =====================================================================================================
+//=====================Fetch All Blogs Data(Get API)=====================//
+router.get("/blogs", GetDataBlog)
+//=====================+=====================//
 
 
-// router.post("/login", userController.loginUser)
-// // =====================================================================================================
-// //The userId is sent by front end
-// router.get("/users/:userId", authenticate, authorise, userController.getUserData)
-// // =====================================================================================================
-// router.put("/users/:userId", authenticate, authorise, userController.updateUser)
-// // =====================================================================================================
-// router.delete("/users/:userId", authenticate, authorise, userController.deleteUser)
-// =====================================================================================================
 module.exports = router;   
