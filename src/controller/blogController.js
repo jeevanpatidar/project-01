@@ -1,7 +1,7 @@
 const blogModel = require("../model/blogModel")
 const authorModel = require("../model/authorModel")
 const mongoose = require('mongoose')
-
+const JWT = require("jsonwebtoken")
 
 
 //=====================Checking the input value is Valid or Invalid=====================//
@@ -99,6 +99,8 @@ const GetDataBlog = async function (req, res) {
         //=====================Get All Blog Data by the help of Query=====================//
         let blog = await blogModel.find(obj)
         if (blog.length == 0) return res.status(404).send({ status: false, msg: "Blog Not Found." })
+
+
 
         res.status(200).send({ status: true, data: blog })
 
@@ -199,10 +201,8 @@ const DeleteByQuery = async function (req, res) {
 
 
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },
-            { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
-        if (!blogDetails) {
-            return res.status(404).send({ status: false, msg: "Already Deleted." })
-        }
+            { $set: { isDeleted: true, deletedAt: Date.now() } })
+
 
         res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails })
 
@@ -214,10 +214,6 @@ const DeleteByQuery = async function (req, res) {
         res.status(500).send({ msg: error.message })
     }
 }
-
-
-
-
 
 
 

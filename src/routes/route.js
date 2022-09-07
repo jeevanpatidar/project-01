@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const CreateAuthor = require("../controller/authorController")
+const { CreateAuthor, AuthorLogin } = require("../controller/authorController")
 const { CreateBlog, GetDataBlog, UpdateBlog, DeleteBlog, DeleteByQuery } = require("../controller/blogController")
+const { Authentication, Authorisation } = require("../Middleware/auth")
+
 
 
 
@@ -9,20 +11,23 @@ const { CreateBlog, GetDataBlog, UpdateBlog, DeleteBlog, DeleteByQuery } = requi
 //=====================Create Authors(Post API)=====================//
 router.post("/authors", CreateAuthor)
 
+//=====================Login Authors(Post API)=====================//
+router.post("/login", AuthorLogin)
+
 //=====================Create Blogs(Post API)=====================//
-router.post("/blogs", CreateBlog)
+router.post("/blogs", Authentication, CreateBlog)
 
 //=====================Fetch All Blogs Data(Get API)=====================//
-router.get("/blogs", GetDataBlog)
+router.get("/blogs", Authentication, GetDataBlog)
 
 //=====================Update Blogs Data(Put API)=====================//
-router.put("/blogs/:blogId", UpdateBlog)
+router.put("/blogs/:blogId", Authentication, Authorisation, UpdateBlog)
 
 //=====================Delete Blogs Data(Delete API)=====================//
-router.delete("/blogs/:blogId", DeleteBlog)
+router.delete("/blogs/:blogId", Authentication, Authorisation, DeleteBlog)
 
 //=====================Delete Blog Data By Query Param(Delete API)=====================//
-router.delete("/blogs", DeleteByQuery)
+router.delete("/blogs", Authentication, Authorisation, DeleteByQuery)
 
 
 

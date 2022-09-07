@@ -1,4 +1,5 @@
 const authorModel = require("../model/authorModel")
+const JWT = require("jsonwebtoken")
 
 
 //=====================Checking the input value is Valid or Invalid=====================//
@@ -56,4 +57,58 @@ const CreateAuthor = async function (req, res) {
     }
 };
 
-module.exports = CreateAuthor
+
+
+//=====================This function used for LogIn Author (Phase II)=====================//
+
+const AuthorLogin = async function (req, res) {
+
+    try {
+
+        let UserName = req.body.EmailId
+        let Password = req.body.Password
+
+
+
+
+        if (!(UserName && Password)) { return res.status(400).send("All Fields are Mandotory.") }
+
+        if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/).test(UserName)) { return res.status(400).send({ status: false, msg: "Write Correct Format." }) }
+
+        // let UserNameDetail = await authorModel.findOne({ email: UserName })
+        // if (!UserNameDetail) return res.status(400).send({ status: false, msg: "Invalid Username." })
+
+        // let PasswordDetail = await authorModel.findOne({ password: Password })
+        // if (!PasswordDetail) return res.status(400).send({ status: false, msg: "Invalid Password." })
+
+        let authorDetail = await authorModel.findOne({ email: UserName, password: Password })
+        if (!authorDetail) return res.status(400).send({ status: false, msg: "Wrong UserName or Password." })
+
+
+        let Payload = {
+            UserId: authorDetail._id.toString(),
+            Batch: "Plutonium",
+            Group: "Room-21",
+            Project: "Blogging Site Mini Project"
+        }
+
+        let token = JWT.sign({ Payload }, "We-Are-Super-4-From-Plutonium")
+
+        res.setHeader("x-api-key", token);
+        res.status(200).send({ status: true, token: token });
+
+
+    } catch (error) {
+        res.status(500).send({ error: error.message })
+    }
+
+
+
+}
+
+// Rajesh:
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjp7IlVzZXJJZCI6IjYzMTVkZmIwMjA0NzJhYTZjYWYyOTQ4OCIsIkJhdGNoIjoiUGx1dG9uaXVtIiwiR3JvdXAiOiJSb29tLTIxIiwiUHJvamVjdCI6IkJsb2dnaW5nIFNpdGUgTWluaSBQcm9qZWN0In0sImlhdCI6MTY2MjU0OTIwM30.PnRWFeXK6ie8PsHJ9imCpLrfyXTEboyhPuOQWmfq640
+
+
+
+module.exports = { CreateAuthor, AuthorLogin }
