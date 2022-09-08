@@ -33,44 +33,48 @@ const Authentication = async function (req, res, next) {
 
 
 }
-//=====================This function used for Authorisation(Phase II)=====================//
 
+
+
+//=====================This function used for Authorisation(Phase II)=====================//
 const Authorisation = async function (req, res, next) {
     try {
-      //====================authorisation by queries=====================//
+
         let BlogId = req.params.blogId;
-        // let decordDetails = req.token.Payload.UserId
         let Query = req.query
 
- //==================== check Presence of Query keys=====================//
+        //==================== Check Presence of Query Keys=====================//
         if (Object.keys(Query).length !== 0) {
+
+            //<<<<================================ Authorisation By Queries =====================================>>>>//
+
             let query = req.query
-            
-   //====================fetch query from db =====================//
+
+            //====================fetch query from db =====================//
             const Blog = await blogModel.findOne({ ...query })
             if (!Blog) {
                 return res.status(404).send({ status: false, message: `Blog is not found` })
 
             }
-      //====================comparing authorid of db and decoded documents =====================//
+            //==================== Comparing Authorid of DB and Decoded Documents =====================//
             if (Blog.authorId.toString() !== req.token.Payload.UserId) {
                 return res.status(400).send({ status: false, message: `Unauthorized access!` });
             }
 
             return next()
         }
-        
-        
-        //======================authorisation by path params====================//
 
-         //=================== fetching blogid from db =====================//
+
+        //<<<<================================ Authorisation By Path Params =====================================>>>>//
+
+        //=================== Fetching Blogid from DB =====================//
         const pBlog = await blogModel.findOne({ _id: BlogId, isDeleted: false })
         if (!pBlog) {
             return res.status(404).send({ status: false, message: `Blog not found` })
-         }
+        }
 
-   
-          //====================comaparing authorid of db and decoded documents=====================//
+
+        //==================== Comparing Authorid of DB and Decoded Documents =====================//
         if (pBlog.authorId.toString() !== req.token.Payload.UserId) {
             return res.status(400).send({ status: false, message: `Unauthorized access!` });
         }
@@ -87,39 +91,5 @@ const Authorisation = async function (req, res, next) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// try{
-//     let decoded =  jwt.verify(token,'functionup-thorium')
-//     let userToModify = req.params.userId
-//     let userLoggedIn= decoded.userId
-//     if(userToModify!=userLoggedIn){
-//       return res.send({msg: " UnAuthorized User !"})
-//     }else{userId}
-//   }
-
-
-
-
-
+//=====================Module Export=====================//
 module.exports = { Authentication, Authorisation }

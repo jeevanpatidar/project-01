@@ -1,5 +1,7 @@
+//=====================Importing Module and Packages=====================//
 const mongoose = require('mongoose')
 
+//=====================Creating Author Schema=====================//
 const authorSchema = new mongoose.Schema({
 
     fname: { type: String, require: true },
@@ -11,4 +13,6 @@ const authorSchema = new mongoose.Schema({
 }, { timestamps: true }
 )
 
+
+//=====================Module Export=====================//
 module.exports = mongoose.model('Author', authorSchema)

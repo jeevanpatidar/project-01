@@ -1,6 +1,10 @@
+//=====================Importing Packages=====================//
 const mongoose = require('mongoose')
+
+//=====================Storing type of AuthorID=====================//
 const ObjectId = mongoose.Schema.Types.ObjectId
 
+//=====================Creating Blog Schema=====================//
 const blogSchema = new mongoose.Schema({
 
     title: { type: String, require: true },
@@ -18,4 +22,6 @@ const blogSchema = new mongoose.Schema({
 }, { timestamps: true }
 )
 
+
+//=====================Module Export=====================//
 module.exports = mongoose.model('Blog', blogSchema)
