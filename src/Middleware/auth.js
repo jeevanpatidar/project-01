@@ -8,7 +8,6 @@ const blogModel = require("../model/blogModel")
 const Authentication = async function (req, res, next) {
     try {
 
-
         //=====================Check Presence of Key with Value in Header=====================//
         let token = req.headers['x-api-key']
         if (!token) { return res.status(400).send({ status: false, msg: "Token must be Present." }) }
@@ -19,15 +18,14 @@ const Authentication = async function (req, res, next) {
                 return res.status(401).send({ status: false, msg: "Token is not valid" })
             } else {
                 req.token = decodedToken
-                console.log(req.token)
+                //console.log(req.token)
                 next()
             }
         })
 
     }
     catch (error) {
-        console.log(error)
-        res.status(500).send({ msg: error.message })
+        res.status(500).send({ status: false, msg: error.message })
     }
 
 
@@ -40,7 +38,6 @@ const Authentication = async function (req, res, next) {
 const Authorisation = async function (req, res, next) {
     try {
 
-        let BlogId = req.params.blogId;
         let Query = req.query
 
         //==================== Check Presence of Query Keys=====================//
@@ -48,10 +45,8 @@ const Authorisation = async function (req, res, next) {
 
             //<<<<================================ Authorisation By Queries =====================================>>>>//
 
-            let query = req.query
-
             //====================fetch query from db =====================//
-            const Blog = await blogModel.findOne({ ...query })
+            const Blog = await blogModel.findOne({ ...Query })
             if (!Blog) {
                 return res.status(404).send({ status: false, message: `Blog is not found` })
 
@@ -67,10 +62,13 @@ const Authorisation = async function (req, res, next) {
 
         //<<<<================================ Authorisation By Path Params =====================================>>>>//
 
+
+        let BlogId = req.params.blogId;
+
         //=================== Fetching Blogid from DB =====================//
         const pBlog = await blogModel.findOne({ _id: BlogId, isDeleted: false })
         if (!pBlog) {
-            return res.status(404).send({ status: false, message: `Blog not found` })
+            return res.status(404).send({ status: false, message: `Blog is not found` })
         }
 
 
@@ -82,8 +80,7 @@ const Authorisation = async function (req, res, next) {
         next()
 
     } catch (error) {
-        console.log(error)
-        res.status(500).send({ msg: error.message })
+        res.status(500).send({ status: false, msg: error.message })
     }
 
 

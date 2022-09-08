@@ -5,14 +5,15 @@ const JWT = require("jsonwebtoken")
 
 //=====================Checking the input value is Valid or Invalid=====================//
 let checkValid = function (value) {
-    if (typeof value == "undefined" || value.trim().length == 0 || typeof value == "number" || typeof value == null) {
+    if (typeof value == "undefined" || typeof value == "number" || value.length == 0 || typeof value == null) {
         return false
-    }
-    if (typeof value == "string") {
+    } else if (typeof value == "string") {
         return true
     }
     return true
 }
+
+
 
 
 //=====================This function is used for Creating an Author=====================//
@@ -22,21 +23,22 @@ const CreateAuthor = async function (req, res) {
 
         //=====================Checking the validation=====================//
         let { fname, lname, title, email, password } = data
-        if (!(fname && lname && email && password)) {
+        if (!(fname && lname && title && email && password)) {
             return res.status(400).send({ status: false, msg: "All fields are mandatory." })
         }
 
         //=====================Validation of First Name=====================//
         if (!checkValid(fname)) return res.status(400).send({ status: false, message: "Please Provide valid Input" })
-        if (!(/^[A-Za-z]+$/).test(data.fname.trim())) return res.status(400).send({ status: false, msg: "Please Use Alphabets in first name" })
+        if (!(/^[A-Za-z]+$/).test(fname)) return res.status(400).send({ status: false, msg: "Please Use Correct Characters in first name" })
 
 
         //=====================Validation of Last Name=====================//
         if (!checkValid(lname)) return res.status(400).send({ status: false, message: "Please Provide valid Input" })
-        if (!(/^[A-Za-z]+$/).test(data.lname)) return res.send({ status: false, message: "Please Use Alphabets in Last Name" })
+        if (!(/^[A-Za-z]+$/).test(lname)) return res.send({ status: false, message: "Please Use Correct Characters in Last Name" })
 
 
         //=====================Validation of Title=====================//
+        title = title.trim()
         if (!(/^Mr|Mrs|Miss+$/).test(title)) return res.status(400).send({ status: false, msg: "Please Use Valid Title." })
 
 
@@ -81,7 +83,6 @@ const AuthorLogin = async function (req, res) {
         //=====================Fetch Data from DB=====================//
         let authorDetail = await authorModel.findOne({ email: UserName, password: Password })
         if (!authorDetail) return res.status(400).send({ status: false, msg: "Wrong UserName or Password." })
-
 
         //=====================Token Generation by using JWT=====================//
         let Payload = {

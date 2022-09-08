@@ -22,6 +22,7 @@ const CreateBlog = async function (req, res) {
         let data = req.body;
         let { title, authorId, category, subcategory, body, tags } = data
 
+        console.log(data)
         //=====================Checking the validation=====================//
         if (!(title && authorId && category && body))
             return res.status(400).send({ status: false, msg: "Please fill the Mandatory Fields." });
@@ -178,7 +179,7 @@ const DeleteByQuery = async function (req, res) {
         let { authorId, tags, category, subcategory, isPublished } = data
 
         //===================== Checking Required Query =====================//
-        if (Object.keys(req.query).length == 0) {
+        if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Mandatory fields are required." });
         }
 
