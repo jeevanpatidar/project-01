@@ -1,7 +1,7 @@
+//=====================Importing Module and Packages=====================//
 const blogModel = require("../model/blogModel")
 const authorModel = require("../model/authorModel")
-const mongoose = require('mongoose')
-const JWT = require("jsonwebtoken")
+
 
 
 //=====================Checking the input value is Valid or Invalid=====================//
@@ -75,35 +75,20 @@ const GetDataBlog = async function (req, res) {
             return res.status(200).send(blogData);
         }
 
-
-        // let Objectid = mongoose.Types.ObjectId(authorId)
+        //===================== Fetching AuthorId from DB =====================//
         let AuthorId = await authorModel.find({ authorId: data.authorId })
         if (!AuthorId) {
             return res.status(400).send({ status: false, msg: "Author is Not Valid !" })
         }
 
-        // if (!checkValid(authorId)) {
-        //     return res.status(400).send({ status: false, message: "Please enter AuthorId." });
-        // } else { obj.authorId = authorId }
-
+        //==================== Storing Query Data in Empty object =====================//
         let obj = { isDeleted: false, ...data }
-        // if (authorId) {obj.authorId = authorId;}
-        // if (tags) { obj.tags = tags; }
-        // if (category) { obj.category = category; }
-        // if (subcategory) { obj.subcategory = subcategory }
 
-        //=====================Console the Query Data=====================//
-        console.log(obj)
-
-
-        //=====================Get All Blog Data by the help of Query=====================//
-        let blog = await blogModel.find(obj)
+        //===================== Get All Blog Data by the help of Query =====================//
+        let blog = await blogModel.find(obj)/*.count()*/
         if (blog.length == 0) return res.status(404).send({ status: false, msg: "Blog Not Found." })
 
-
-
         res.status(200).send({ status: true, data: blog })
-
 
     } catch (error) {
         res.status(500).send({ error: error.message })
@@ -117,32 +102,30 @@ const UpdateBlog = async function (req, res) {
 
         let data = req.body
         let BlogId = req.params.blogId
-        // let blogId = mongoose.Types.ObjectId(BlogId)
+
+        //===================== Destructuring Data from Body =====================//
         let { title, body, tags, subcategory } = data
 
+        //===================== Cheking Presence of BlogId =====================//
+        if (!BlogId) return res.status(404).send({ status: false, msg: "Please input valid BlogId." });
+
+        //===================== Fetching BlogID from DB =====================//
         let checkBlogID = await blogModel.findOne({ _id: BlogId })
         if (!checkBlogID) return res.status(404).send({ status: false, msg: "Please input valid BlogId." })
-        console.log(checkBlogID)
-        // let obj = {}
-        // if (BlogId) {
-        if (!BlogId) return res.status(404).send({ status: false, msg: "Please input valid BlogId." });
-        // else obj.blogId = BlogId;
+        // console.log(checkBlogID)
 
-        // else {
-        //     return res.status(404).send({ status: false, msg: "Please put BlogId." })
-        // }
-
+        //===================== Checking Required Field =====================//
         if (!(title || body || tags || subcategory)) {
             return res.status(400).send({ status: false, message: "Mandatory fields are required." });
         }
 
-
+        //===================== Fetching Data with BlogId and Updating Document =====================//
         let blog = await blogModel.findOneAndUpdate({ _id: BlogId }, {
             $push: { subcategory: subcategory, tags: tags },
             $set: { title: title, body: body, isPublished: true, publishedAt: Date.now() }
         }, { new: true })
-        if (!blog) return res.status(404).send({ status: false, msg: "Blog not found." })
 
+        if (!blog) return res.status(404).send({ status: false, msg: "Blog not found." })
 
         res.status(200).send({ status: true, msg: "Successfully Updated ", data: blog })
 
@@ -159,50 +142,54 @@ const UpdateBlog = async function (req, res) {
 const DeleteBlog = async function (req, res) {
     try {
         let BlogId = req.params.blogId
-        if (!checkValid(BlogId)) {
+
+        if (!BlogId) {
             return res.status(400).send({ status: false, msg: "BlogId is not Defined." })
         }
 
+        //===================== Fetching Data from DB  =====================//
         let blogDetails = await blogModel.findOne({ _id: BlogId, isDeleted: false })
         if (!blogDetails) {
             return res.status(404).send({ status: false, msg: "Details are not exist." })
         } else {
 
+            //===================== Fetching & Deleting Data From DB =====================//
             let blogDetails2 = await blogModel.findOneAndUpdate({ _id: BlogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
 
             res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails2 })
-            console.log(blogDetails)
+
+            // console.log(blogDetails)
+
         }
     }
 
-
     catch (error) {
-        console.log(error)
         res.status(500).send({ msg: error.message })
     }
 }
-
 
 
 //=====================This function used for Delete Blog=====================//
 const DeleteByQuery = async function (req, res) {
     try {
         let data = req.query
+
+        //===================== Destructuring Data from Query =====================//
         let { authorId, tags, category, subcategory, isPublished } = data
 
-
-        // if (!(authorId || tags || category || subcategory || isPublished)) {
-        //     return res.status(400).send({ status: false, message: "Mandatory fields are required." });
-        // }
-
+        //===================== Checking Required Query =====================//
         if (Object.keys(req.query).length == 0) {
             return res.status(400).send({ status: false, message: "Mandatory fields are required." });
         }
 
-
+        //===================== Fetching Data By Query and Delete it =====================//
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },
             { $set: { isDeleted: true, deletedAt: Date.now() } })
 
+        // console.log(blogDetails)
+
+        //===================== Checking if Blog is not Present =====================//
+        if (blogDetails.modifiedCount == 0 || blogDetails.matchedCount == 0) { return res.status(404).send({ status: false, msg: "Blog is not Present." }) }
 
         res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails })
 
@@ -214,10 +201,6 @@ const DeleteByQuery = async function (req, res) {
         res.status(500).send({ msg: error.message })
     }
 }
-
-
-
-
 
 
 
