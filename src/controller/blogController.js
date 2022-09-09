@@ -1,14 +1,15 @@
 //=====================Importing Module and Packages=====================//
 const blogModel = require("../model/blogModel")
 const authorModel = require("../model/authorModel")
-const moment = require('moment-timezone');
+const moment = require('moment');
+
 
 
 
 
 //=====================Date of Indian Time Zone=====================//
-let DATE = (Date.now(), "Asia/Kolkata");
-console.log(DATE)
+let DATE = moment().format()
+
 
 //=====================Checking the input value is Valid or Invalid=====================//
 let checkValid = function (value) {
@@ -140,7 +141,7 @@ const UpdateBlog = async function (req, res) {
         //===================== Fetching BlogID from DB =====================//
         let checkBlogID = await blogModel.findOne({ _id: BlogId })
         if (!checkBlogID) return res.status(404).send({ status: false, msg: "Please input valid BlogId." })
-        // console.log(checkBlogID)
+
 
         //===================== Checking Required Field =====================//
         if (!(title || body || tags || subcategory)) {
@@ -195,6 +196,7 @@ const DeleteBlog = async function (req, res) {
 const DeleteByQuery = async function (req, res) {
     try {
         let data = req.query
+        let moment1 = require('moment-timezone');
 
         //===================== Destructuring Data from Query =====================//
         let { authorId, tags, category, subcategory, isPublished } = data
@@ -207,9 +209,8 @@ const DeleteByQuery = async function (req, res) {
 
         //===================== Fetching Data By Query and Delete it =====================//
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },
-            { $set: { deletedAt: moment.tz(Date.now(), "Asia/Kolkata"), isDeleted: true } })
+            { $set: { isDeleted: true, deletedAt: DATE } })
 
-        console.log(moment.tz(Date.now(), "Asia/Kolkata"))
         //===================== Checking if Blog is not Present =====================//
         if (blogDetails.modifiedCount == 0 || blogDetails.matchedCount == 0) { return res.status(404).send({ status: false, msg: "Blog is not Present." }) }
 
