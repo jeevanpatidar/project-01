@@ -1,8 +1,14 @@
 //=====================Importing Module and Packages=====================//
 const blogModel = require("../model/blogModel")
 const authorModel = require("../model/authorModel")
+const moment = require('moment-timezone');
 
 
+
+
+//=====================Date of Indian Time Zone=====================//
+let DATE = (Date.now(), "Asia/Kolkata");
+console.log(DATE)
 
 //=====================Checking the input value is Valid or Invalid=====================//
 let checkValid = function (value) {
@@ -69,10 +75,23 @@ const GetDataBlog = async function (req, res) {
 
         //=====================Get All Blog Data =====================//
         if (Object.keys(data) == 0) {
-            let blogData = await blogModel.find({ $and: [{ isDeleted: { $eq: false } }, { isPublished: { $eq: true } }] }).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+            let blogData = await blogModel.find({ $and: [{ isDeleted: { $eq: false } }, { isPublished: { $eq: true } }] }).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 }).lean()
+            /* lean() : IT CONVETS BSON FORMAT INTO JAVASCRIPT OBJECT FORMAT.*/
+
+
+            //===================== This loop is for to Concat AuthorID Values =====================//
+            for (let i in blogData) {
+                let LastElement = Object.values(blogData[i].authorId)
+                blogData[i].authorId = LastElement.pop() + ". " + LastElement.join(" ")
+            }
+
+            //===================== Checking length of blogData =====================//
             if (blogData.length == 0) return res.status(404).send({ status: false, msg: "No documents are found" })
+
             return res.status(200).send(blogData);
+
         }
+
 
         //===================== Fetching AuthorId from DB =====================//
         let AuthorId = await authorModel.find({ authorId: data.authorId })
@@ -84,7 +103,16 @@ const GetDataBlog = async function (req, res) {
         let obj = { isDeleted: false, ...data }
 
         //===================== Get All Blog Data by the help of Query =====================//
-        let blog = await blogModel.find(obj).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 })/*.count()*/
+        let blog = await blogModel.find(obj).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 }).lean()/*.count()*/
+
+
+        //===================== This loop is for to Concat AuthorID Values =====================//
+        for (let i in blog) {
+            let LastElement = Object.values(blog[i].authorId)
+            blog[i].authorId = LastElement.pop() + ". " + LastElement.join(" ")
+        }
+
+        //===================== Checking length of blog =====================//
         if (blog.length == 0) return res.status(404).send({ status: false, msg: "Blog Not Found." })
 
         res.status(200).send({ status: true, data: blog })
@@ -122,7 +150,7 @@ const UpdateBlog = async function (req, res) {
         //===================== Fetching Data with BlogId and Updating Document =====================//
         let blog = await blogModel.findOneAndUpdate({ _id: BlogId }, {
             $push: { subcategory: subcategory, tags: tags },
-            $set: { title: title, body: body, isPublished: true, publishedAt: Date.now() }
+            $set: { title: title, body: body, isPublished: true, publishedAt: DATE }
         }, { new: true })
 
         if (!blog) return res.status(404).send({ status: false, msg: "Blog not found." })
@@ -149,7 +177,7 @@ const DeleteBlog = async function (req, res) {
         }
 
         //===================== Fetching & Deleting Data From DB =====================//
-        let blogDetails2 = await blogModel.findOneAndUpdate({ _id: BlogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+        let blogDetails2 = await blogModel.findOneAndUpdate({ _id: BlogId }, { $set: { isDeleted: true, deletedAt: DATE } }, { new: true })
 
         res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails2 })
 
@@ -179,8 +207,9 @@ const DeleteByQuery = async function (req, res) {
 
         //===================== Fetching Data By Query and Delete it =====================//
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },
-            { $set: { isDeleted: true, deletedAt: Date.now() } })
+            { $set: { deletedAt: moment.tz(Date.now(), "Asia/Kolkata"), isDeleted: true } })
 
+        console.log(moment.tz(Date.now(), "Asia/Kolkata"))
         //===================== Checking if Blog is not Present =====================//
         if (blogDetails.modifiedCount == 0 || blogDetails.matchedCount == 0) { return res.status(404).send({ status: false, msg: "Blog is not Present." }) }
 
