@@ -58,6 +58,7 @@ const CreateAuthor = async function (req, res) {
 
 
     } catch (error) {
+        
         res.status(500).send({ error: error.message })
     }
 };
@@ -102,6 +103,7 @@ const AuthorLogin = async function (req, res) {
 
 
     } catch (error) {
+
         res.status(500).send({ error: error.message })
     }
 

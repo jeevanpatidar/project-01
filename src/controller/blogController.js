@@ -54,6 +54,7 @@ const CreateBlog = async function (req, res) {
 
 
     } catch (error) {
+
         res.status(500).send({ error: error.message })
     }
 };
@@ -62,8 +63,8 @@ const CreateBlog = async function (req, res) {
 //=====================This function used for Fetching a Blog=====================//
 const GetDataBlog = async function (req, res) {
     try {
+
         let data = req.query
-        // let { authorId } = data;
 
 
         //=====================Get All Blog Data =====================//
@@ -89,6 +90,7 @@ const GetDataBlog = async function (req, res) {
         res.status(200).send({ status: true, data: blog })
 
     } catch (error) {
+
         res.status(500).send({ error: error.message })
     }
 };
@@ -129,6 +131,7 @@ const UpdateBlog = async function (req, res) {
 
 
     } catch (error) {
+
         res.status(500).send({ error: error.message })
     }
 
@@ -151,10 +154,10 @@ const DeleteBlog = async function (req, res) {
         res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails2 })
 
 
-        // }
     }
 
     catch (error) {
+
         res.status(500).send({ msg: error.message })
     }
 }
@@ -178,8 +181,6 @@ const DeleteByQuery = async function (req, res) {
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },
             { $set: { isDeleted: true, deletedAt: Date.now() } })
 
-        // console.log(blogDetails)
-
         //===================== Checking if Blog is not Present =====================//
         if (blogDetails.modifiedCount == 0 || blogDetails.matchedCount == 0) { return res.status(404).send({ status: false, msg: "Blog is not Present." }) }
 
@@ -189,7 +190,7 @@ const DeleteByQuery = async function (req, res) {
 
 
     catch (error) {
-        console.log(error)
+
         res.status(500).send({ msg: error.message })
     }
 }

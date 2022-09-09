@@ -26,10 +26,9 @@ const Authentication = async function (req, res, next) {
 
     }
     catch (error) {
+
         res.status(500).send({ status: false, msg: error.message })
     }
-
-
 }
 
 
@@ -43,8 +42,8 @@ const Authorisation = async function (req, res, next) {
         //==================== Check Presence of Query Keys=====================//
         if (Object.keys(Query).length !== 0) {
 
-            //<<<<================================ Authorisation By Queries =====================================>>>>//
 
+            //<<<<================================ Authorisation By Query Params =====================================>>>>//
             //====================fetch query from db =====================//
             const Blog = await blogModel.findOne({ ...Query })
             if (!Blog) {
@@ -57,13 +56,11 @@ const Authorisation = async function (req, res, next) {
             }
 
             return next()
-
         }
 
+        
 
         //<<<<================================ Authorisation By Path Params =====================================>>>>//
-
-
         let BlogId = req.params.blogId;
 
         //=================== Fetching Blogid from DB =====================//
@@ -78,10 +75,10 @@ const Authorisation = async function (req, res, next) {
             return res.status(400).send({ status: false, message: `Unauthorized access!` });
         }
 
-
         next()
 
     } catch (error) {
+
         res.status(500).send({ status: false, msg: error.message })
     }
 
