@@ -29,17 +29,16 @@ const CreateAuthor = async function (req, res) {
 
         //=====================Validation of First Name=====================//
         if (!checkValid(fname)) return res.status(400).send({ status: false, message: "Please Provide valid Input" })
-        if (!(/^[A-Za-z]+$/).test(fname)) return res.status(400).send({ status: false, msg: "Please Use Correct Characters in first name" })
+        if (!(/^[A-Za-z]+$\b/).test(fname)) return res.status(400).send({ status: false, msg: "Please Use Correct Characters in first name" })
 
 
         //=====================Validation of Last Name=====================//
         if (!checkValid(lname)) return res.status(400).send({ status: false, message: "Please Provide valid Input" })
-        if (!(/^[A-Za-z]+$/).test(lname)) return res.send({ status: false, message: "Please Use Correct Characters in Last Name" })
+        if (!(/^[A-Za-z]+$\b/).test(lname)) return res.send({ status: false, message: "Please Use Correct Characters in Last Name" })
 
 
         //=====================Validation of Title=====================//
-        title = title.trim()
-        if (!(/^Mr|Mrs|Miss+$/).test(title)) return res.status(400).send({ status: false, msg: "Please Use Valid Title." })
+        if (!(/^(Mr|Mrs|Miss)+$\b/).test(title)) return res.status(400).send({ status: false, msg: "Please Use Valid Title." })
 
 
         //=====================Validation of EmailID=====================//
@@ -50,7 +49,7 @@ const CreateAuthor = async function (req, res) {
 
 
         //=====================Validation of Password=====================//
-        if (!(/^[A-Za-z0-9]{6,}$/).test(password)) { return res.status(400).send({ status: false, msg: "Please provide valid Password" }) }
+        if (!(/^(?=.*[0-9])(?=.*[!@#$%^&*])([a-zA-Z0-9!@#$%^&*]){6,16}$/).test(password)) { return res.status(400).send({ status: false, msg: "Enter a combination of at least six numbers, letters and Punctuation Marks(Such as !, @, #, $, &, *)." }) }
 
 
         //=====================Create Author=====================//
@@ -77,8 +76,8 @@ const AuthorLogin = async function (req, res) {
         if (!(UserName && Password)) { return res.status(400).send("All Fields are Mandotory.") }
 
         //=====================Checking Format of Email & Password by the help of Regex=====================//
-        if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/).test(UserName)) { return res.status(400).send({ status: false, msg: "Please Provide Valid Email Format." }) }
-        if (!(/^[A-Za-z0-9]{6,}$/).test(Password)) { return res.status(400).send({ status: false, msg: "Please Provide Valid Password Format." }) }
+        if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/).test(UserName)) { return res.status(400).send({ status: false, msg: "Please Check EmailID." }) }
+        if (!(/^(?=.*[0-9])(?=.*[!@#$%^&*])([a-zA-Z0-9!@#$%^&*]){6,16}$/).test(Password)) { return res.status(400).send({ status: false, msg: "Re-enter your Correct Password." }) }
 
         //=====================Fetch Data from DB=====================//
         let authorDetail = await authorModel.findOne({ email: UserName, password: Password })
@@ -87,6 +86,8 @@ const AuthorLogin = async function (req, res) {
         //=====================Token Generation by using JWT=====================//
         let Payload = {
             UserId: authorDetail._id.toString(),
+            EmailID: authorDetail.email,
+            Password: authorDetail.password,
             Batch: "Plutonium",
             Group: "Room-21",
             Project: "Blogging Site Mini Project"

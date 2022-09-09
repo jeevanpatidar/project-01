@@ -7,8 +7,8 @@ const ObjectId = mongoose.Schema.Types.ObjectId
 //=====================Creating Blog Schema=====================//
 const blogSchema = new mongoose.Schema({
 
-    title: { type: String, require: true },
-    body: { type: String, require: true },
+    title: { type: String, require: true, trim: true },
+    body: { type: String, require: true, trim: true },
     authorId: { type: ObjectId, ref: 'Author', require: true },
     tags: [String],
     category: { type: [String], require: true },

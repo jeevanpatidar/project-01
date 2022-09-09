@@ -6,12 +6,8 @@ const authorModel = require("../model/authorModel")
 
 //=====================Checking the input value is Valid or Invalid=====================//
 let checkValid = function (value) {
-    if (typeof value == "undefined" || value.length == 0 || typeof value == "number" || typeof value == null) {
-        return false
-    }
-    if (typeof value == "string") {
-        return true
-    }
+    if (typeof value == "undefined" || typeof value == "number" || typeof value == null) { return false }
+    if (typeof value == "string" && value.trim().length == 0) { return false }
     return true
 }
 
@@ -48,6 +44,7 @@ const CreateBlog = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter Subcategory of The Blog." })
 
         //=====================Validation of AuthorId=====================//
+        if (!(/^[a-f\d]{24}$/i).test(authorId)) { return res.status(400).send({ status: false, message: "Please enter Correct AuthorID." }) }
         let authorData = await authorModel.findById(authorId);
         if (!authorData) return res.status(404).send({ status: false, msg: "Author not found." });
 
@@ -71,7 +68,7 @@ const GetDataBlog = async function (req, res) {
 
         //=====================Get All Blog Data =====================//
         if (Object.keys(data) == 0) {
-            let blogData = await blogModel.find({ $and: [{ isDeleted: { $eq: false } }, { isPublished: { $eq: true } }] })
+            let blogData = await blogModel.find({ $and: [{ isDeleted: { $eq: false } }, { isPublished: { $eq: true } }] }).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 })
             if (blogData.length == 0) return res.status(404).send({ status: false, msg: "No documents are found" })
             return res.status(200).send(blogData);
         }
@@ -86,7 +83,7 @@ const GetDataBlog = async function (req, res) {
         let obj = { isDeleted: false, ...data }
 
         //===================== Get All Blog Data by the help of Query =====================//
-        let blog = await blogModel.find(obj)/*.count()*/
+        let blog = await blogModel.find(obj).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 })/*.count()*/
         if (blog.length == 0) return res.status(404).send({ status: false, msg: "Blog Not Found." })
 
         res.status(200).send({ status: true, data: blog })
@@ -148,20 +145,13 @@ const DeleteBlog = async function (req, res) {
             return res.status(400).send({ status: false, msg: "BlogId is not Defined." })
         }
 
-        //===================== Fetching Data from DB  =====================//
-        let blogDetails = await blogModel.findOne({ _id: BlogId, isDeleted: false })
-        if (!blogDetails) {
-            return res.status(404).send({ status: false, msg: "Details are not exist." })
-        } else {
+        //===================== Fetching & Deleting Data From DB =====================//
+        let blogDetails2 = await blogModel.findOneAndUpdate({ _id: BlogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
 
-            //===================== Fetching & Deleting Data From DB =====================//
-            let blogDetails2 = await blogModel.findOneAndUpdate({ _id: BlogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+        res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails2 })
 
-            res.status(200).send({ status: true, msg: "Blog deleted.", data: blogDetails2 })
 
-            // console.log(blogDetails)
-
-        }
+        // }
     }
 
     catch (error) {
@@ -182,6 +172,7 @@ const DeleteByQuery = async function (req, res) {
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Mandatory fields are required." });
         }
+        if (!(authorId || tags || category || subcategory || isPublished)) { return res.status(404).send({ status: false, msg: "Please Write authorId or tags or category or subcategory or isPublished." }) }
 
         //===================== Fetching Data By Query and Delete it =====================//
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },

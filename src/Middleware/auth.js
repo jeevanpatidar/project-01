@@ -18,8 +18,9 @@ const Authentication = async function (req, res, next) {
                 return res.status(401).send({ status: false, msg: "Token is not valid" })
             } else {
                 req.token = decodedToken
-                //console.log(req.token)
+
                 next()
+
             }
         })
 
@@ -27,7 +28,6 @@ const Authentication = async function (req, res, next) {
     catch (error) {
         res.status(500).send({ status: false, msg: error.message })
     }
-
 
 
 }
@@ -57,6 +57,7 @@ const Authorisation = async function (req, res, next) {
             }
 
             return next()
+
         }
 
 
@@ -77,12 +78,12 @@ const Authorisation = async function (req, res, next) {
             return res.status(400).send({ status: false, message: `Unauthorized access!` });
         }
 
+
         next()
 
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message })
     }
-
 
 }
 
