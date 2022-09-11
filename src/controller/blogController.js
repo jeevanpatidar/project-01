@@ -25,7 +25,7 @@ const CreateBlog = async function (req, res) {
         let data = req.body;
         let { title, authorId, category, subcategory, body, tags } = data
 
-        console.log(data)
+
         //=====================Checking the validation=====================//
         if (!(title && authorId && category && body))
             return res.status(400).send({ status: false, msg: "Please fill the Mandatory Fields." });
@@ -55,9 +55,32 @@ const CreateBlog = async function (req, res) {
         let authorData = await authorModel.findById(authorId);
         if (!authorData) return res.status(404).send({ status: false, msg: "Author not found." });
 
-        //=====================Creation of Blog=====================//
-        let createBlog = await blogModel.create(data);
-        res.status(201).send({ status: true, data: createBlog });
+
+        //===================== Checking given AuthorID Whether It is You or Not! =====================//
+        if (authorId) {
+            if (authorId !== req.token.Payload.UserId) {
+                return res.status(400).send({ status: false, message: "You can't create someone else!! Please use your Own AuthorID." });
+            }
+        }
+
+        //===================== Checking given Published is True or False inside Body. Then publishedAt will Update the Current Date & Time When You Create Blog =====================//
+        if (req.body.isPublished == true) {
+            req.body.publishedAt = DATE
+        }
+
+        //===================== Fetch the data from DB =====================//
+        let checkTitle = await blogModel.findOne({ title: title })
+
+        if (!checkTitle) {
+            //===================== Creation of Blog =====================//
+            let createBlog = await blogModel.create(data);
+            return res.status(201).send({ status: true, data: createBlog });
+        }
+
+        //===================== Checking given Title Whether that data is already Exist in our DB or Not =====================//
+        if (title === checkTitle.title) {
+            return res.status(400).send({ status: false, message: "Same Given Title already Exist!! You Should give another Title." });
+        }
 
 
     } catch (error) {
