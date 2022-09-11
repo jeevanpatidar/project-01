@@ -45,7 +45,7 @@ const Authorisation = async function (req, res, next) {
 
             //<<<<================================ Authorisation By Query Params =====================================>>>>//
             //====================fetch query from db =====================//
-            const Blog = await blogModel.findOne({ ...Query })
+            const Blog = await blogModel.findOne({ authorId: req.token.Payload.UserId, ...Query })
             if (!Blog) {
                 return res.status(404).send({ status: false, message: `Blog is not found` })
 
@@ -58,7 +58,7 @@ const Authorisation = async function (req, res, next) {
             return next()
         }
 
-        
+
 
         //<<<<================================ Authorisation By Path Params =====================================>>>>//
         let BlogId = req.params.blogId;
