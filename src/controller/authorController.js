@@ -49,7 +49,7 @@ const CreateAuthor = async function (req, res) {
 
 
         //=====================Validation of Password=====================//
-        if (!(/^(?=.*[0-9])(?=.*[!@#$%^&*])([a-zA-Z0-9!@#$%^&*]){6,16}$/).test(password)) { return res.status(400).send({ status: false, msg: "Your password must be at least 6 characters long, contain at least one number and symbol, and have a mixture of uppercase and lowercase letters." }) }
+        if (!(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/).test(password)) { return res.status(400).send({ status: false, msg: "Your password must be at least 6 characters long, contain at least one number and symbol, and have a mixture of uppercase and lowercase letters." }) }
 
 
         //=====================Create Author=====================//
@@ -58,7 +58,7 @@ const CreateAuthor = async function (req, res) {
 
 
     } catch (error) {
-        
+
         res.status(500).send({ error: error.message })
     }
 };
@@ -78,7 +78,7 @@ const AuthorLogin = async function (req, res) {
 
         //=====================Checking Format of Email & Password by the help of Regex=====================//
         if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/).test(UserName)) { return res.status(400).send({ status: false, msg: "Please Check EmailID." }) }
-        if (!(/^(?=.*[0-9])(?=.*[!@#$%^&*])([a-zA-Z0-9!@#$%^&*]){6,16}$/).test(Password)) { return res.status(400).send({ status: false, msg: "Re-enter your Correct Password." }) }
+        if (!(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/).test(Password)) { return res.status(400).send({ status: false, msg: "Re-enter your Correct Password." }) }
 
         //=====================Fetch Data from DB=====================//
         let authorDetail = await authorModel.findOne({ email: UserName, password: Password })
