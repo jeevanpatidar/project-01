@@ -49,7 +49,7 @@ const CreateAuthor = async function (req, res) {
 
 
         //=====================Validation of Password=====================//
-        if (!(/^(?=.*[0-9])(?=.*[!@#$%^&*])([a-zA-Z0-9!@#$%^&*]){6,16}$/).test(password)) { return res.status(400).send({ status: false, msg: "Enter a combination of at least six numbers, letters and Punctuation Marks(Such as !, @, #, $, &, *)." }) }
+        if (!(/^(?=.*[0-9])(?=.*[!@#$%^&*])([a-zA-Z0-9!@#$%^&*]){6,16}$/).test(password)) { return res.status(400).send({ status: false, msg: "Your password must be at least 6 characters long, contain at least one number and symbol, and have a mixture of uppercase and lowercase letters." }) }
 
 
         //=====================Create Author=====================//
