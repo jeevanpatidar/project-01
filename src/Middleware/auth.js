@@ -47,7 +47,7 @@ const Authorisation = async function (req, res, next) {
             //====================fetch query from db =====================//
             const Blog = await blogModel.findOne({ authorId: req.token.Payload.UserId, ...Query })
             if (!Blog) {
-                return res.status(404).send({ status: false, message: `Blog is not found` })
+                return res.status(404).send({ status: false, message: "No Blog Found with Authorise Person." })
 
             }
             //==================== Comparing Authorid of DB and Decoded Documents =====================//
