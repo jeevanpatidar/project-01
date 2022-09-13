@@ -45,7 +45,7 @@ const CreateAuthor = async function (req, res) {
         if (!checkValid(email)) return res.status(400).send({ status: false, message: "Spaces aren't Allowed." })
         if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/).test(email)) { return res.status(400).send({ status: false, msg: "Please provide valid Email" }) }
         let checkDuplicate = await authorModel.findOne({ email: email })
-        if (checkDuplicate) { return res.status(400).send({ status: false, msg: "This EmailID already exists please provide another EmailID." }) }
+        if (checkDuplicate) { return res.status(409).send({ status: false, msg: "This EmailID already exists please provide another EmailID." }) }
 
 
         //=====================Validation of Password=====================//
@@ -109,7 +109,7 @@ const AuthorLogin = async function (req, res) {
 
 }
 
-
+  
 
 //=====================Module Export=====================//
 module.exports = { CreateAuthor, AuthorLogin }

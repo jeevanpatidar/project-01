@@ -50,9 +50,11 @@ const Authorisation = async function (req, res, next) {
                 return res.status(404).send({ status: false, message: "No Blog Found with Authorise Person." })
 
             }
+
+
             //==================== Comparing Authorid of DB and Decoded Documents =====================//
             if (Blog.authorId.toString() !== req.token.Payload.UserId) {
-                return res.status(400).send({ status: false, message: `Unauthorized access!` });
+                return res.status(403).send({ status: false, message: `Unauthorized ${25454} access!` });
             }
 
             return next()
@@ -72,7 +74,7 @@ const Authorisation = async function (req, res, next) {
 
         //==================== Comparing Authorid of DB and Decoded Documents =====================//
         if (pBlog.authorId.toString() !== req.token.Payload.UserId) {
-            return res.status(400).send({ status: false, message: `Unauthorized access!` });
+            return res.status(403).send({ status: false, message: `Unauthorized access!` });
         }
 
         next()

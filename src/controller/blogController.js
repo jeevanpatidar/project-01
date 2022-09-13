@@ -59,7 +59,7 @@ const CreateBlog = async function (req, res) {
         //===================== Checking given AuthorID Whether It is You or Not! =====================//
         if (authorId) {
             if (authorId !== req.token.Payload.UserId) {
-                return res.status(400).send({ status: false, message: "You can't create someone else!! Please use your Own AuthorID." });
+                return res.status(403).send({ status: false, message: "You can't create someone else!! Please use your Own AuthorID." });
             }
         }
 
@@ -98,9 +98,9 @@ const GetDataBlog = async function (req, res) {
 
 
         //=====================Get All Blog Data =====================//
-        if (Object.keys(data) == 0) {
-            let blogData = await blogModel.find({ $and: [{ isDeleted: { $eq: false } }, { isPublished: { $eq: true } }] }).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 }).lean()
-            /* lean() : IT CONVETS BSON FORMAT INTO JAVASCRIPT OBJECT FORMAT.*/
+        if (Object.keys(data).length == 0) {
+            let blogData = await blogModel.find({ $and: [{ isDeleted: { $eq: false } }, { isPublished: { $eq: true } }] }).populate('authorId', { _id: 0, fname: 1, lname: 1, title: 1 }).lean()
+            /* lean() : IT CONVERTS BSON FORMAT INTO JAVASCRIPT OBJECT FORMAT.*/
 
 
             //===================== This loop is for to Concat AuthorID Values =====================//
@@ -127,7 +127,7 @@ const GetDataBlog = async function (req, res) {
         let obj = { isDeleted: false, ...data }
 
         //===================== Get All Blog Data by the help of Query =====================//
-        let blog = await blogModel.find(obj).populate('authorId', { _id: 0, email: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0 }).lean()/*.count()*/
+        let blog = await blogModel.find(obj).populate('authorId', { _id: 0, fname: 1, lname: 1, title: 1 }).lean()/*.count()*/
 
 
         //===================== This loop is for to Concat AuthorID Values =====================//
@@ -219,7 +219,6 @@ const DeleteBlog = async function (req, res) {
 const DeleteByQuery = async function (req, res) {
     try {
         let data = req.query
-        let moment1 = require('moment-timezone');
 
         //===================== Destructuring Data from Query =====================//
         let { authorId, tags, category, subcategory, isPublished } = data
@@ -228,7 +227,7 @@ const DeleteByQuery = async function (req, res) {
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Mandatory fields are required." });
         }
-        if (!(authorId || tags || category || subcategory || isPublished)) { return res.status(404).send({ status: false, msg: "Please Write authorId or tags or category or subcategory or isPublished." }) }
+        if (!(authorId || tags || category || subcategory || isPublished)) { return res.status(400).send({ status: false, msg: "Please Write authorId or tags or category or subcategory or isPublished." }) }
 
         //===================== Fetching Data By Query and Delete it =====================//
         let blogDetails = await blogModel.updateMany({ $and: [{ isDeleted: false }, { $or: [{ authorId: authorId }, { tags: tags }, { category: category }, { subcategory: subcategory }, { isPublished: isPublished }] }] },
